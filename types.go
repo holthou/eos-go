@@ -56,9 +56,11 @@ func (ss *SafeString) UnmarshalBinary(d *Decoder) error {
 }
 
 type AccountResourceLimit struct {
-	Used      Int64 `json:"used"`
-	Available Int64 `json:"available"`
-	Max       Int64 `json:"max"`
+	Used      Int64    `json:"used"`
+	Available Int64    `json:"available"`
+	Max       Int64    `json:"max"`
+	LastUsage JSONTime `json:"last_usage_update_time"`
+	CurUsed   Int64    `json:"current_used"`
 }
 
 type DelegatedBandwidth struct {
@@ -1499,8 +1501,9 @@ func (t fcVariantType) String() string {
 }
 
 // FIXME: Ideally, we would re-use `BaseVariant` but that requires some
-//        re-thinking of the decoder to make it efficient to read FCVariant types. For now,
-//        let's re-code it a bit to make it as efficient as possible.
+//
+//	re-thinking of the decoder to make it efficient to read FCVariant types. For now,
+//	let's re-code it a bit to make it as efficient as possible.
 type fcVariant struct {
 	TypeID fcVariantType
 	Impl   interface{}
@@ -1514,7 +1517,8 @@ func (a fcVariant) IsNil() bool {
 // and object, turning everything along the way in Go primitives types.
 //
 // **Note** For `Int64` and `Uint64`, we return `eos.Int64` and `eos.Uint64` types
-//          so that JSON marshalling is done correctly for large numbers
+//
+//	so that JSON marshalling is done correctly for large numbers
 func (a fcVariant) ToNative() interface{} {
 	if a.TypeID == fcVariantNullType ||
 		a.TypeID == fcVariantDoubleType ||
